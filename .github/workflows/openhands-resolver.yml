@@ -196,7 +196,7 @@ jobs:
           github-token: ${{ steps.app-token.outputs.token || github.token }}
           script: |
             const issueType = process.env.ISSUE_TYPE;
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: ${{ env.ISSUE_NUMBER }},
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -325,7 +325,7 @@ jobs:
               console.log("Updated pull request found. Skipping comment.");
               process.env.AGENT_RESPONDED = 'true';
             } else if (logContent.includes(noChangesMessage)) {
-              github.rest.issues.createComment({
+              await github.rest.issues.createComment({
                 issue_number: issueNumber,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -384,7 +384,7 @@ jobs:
 
             // Check "success" log from resolver output
             if (success && prNumber) {
-              github.rest.issues.createComment({
+              await github.rest.issues.createComment({
                 issue_number: issueNumber,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -398,7 +398,7 @@ jobs:
                 commentBody += `\n\nAdditional details about the failure:\n${resultExplanation}`;
               }
 
-              github.rest.issues.createComment({
+              await github.rest.issues.createComment({
                 issue_number: issueNumber,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -416,7 +416,7 @@ jobs:
           script: |
             const issueNumber = ${{ env.ISSUE_NUMBER }};
 
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: issueNumber,
               owner: context.repo.owner,
               repo: context.repo.repo,
