@@ -40,6 +40,12 @@ on:
         required: false
       PAT_USERNAME:
         required: false
+      APP_ID:
+        required: false
+      APP_USERNAME:
+        required: false
+      APP_PRIVATE_KEY:
+        required: false
 
   issues:
     types: [labeled]
