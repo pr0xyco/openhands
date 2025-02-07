@@ -94,12 +94,15 @@ def apply_diff(diff, text, reverse=False, use_patch=False):
                     hunk=hunk,
                 )
             if lines[old - 1] != line:
-                raise HunkApplyException(
-                    'context line {n}, "{line}" does not match "{sl}"'.format(
-                        n=old, line=line, sl=lines[old - 1]
-                    ),
-                    hunk=hunk,
-                )
+                normalized_line = ' '.join(line.trim().split())
+                normalized_source = ' '.join(lines[old - 1].trim().split())
+                if normalized_line != normalized_source:
+                    raise HunkApplyException(
+                        'abc context line {n}, "{line}" does not match "{sl}"'.format(
+                            n=old, line=line, sl=lines[old - 1]
+                        ),
+                        hunk=hunk,
+                    )
 
     # for calculating the old line
     r = 0
