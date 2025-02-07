@@ -94,8 +94,8 @@ def apply_diff(diff, text, reverse=False, use_patch=False):
                     hunk=hunk,
                 )
             if lines[old - 1] != line:
-                normalized_line = ' '.join(line.trim().split())
-                normalized_source = ' '.join(lines[old - 1].trim().split())
+                normalized_line = ' '.join(line.strip().split())
+                normalized_source = ' '.join(lines[old - 1].strip().split())
                 if normalized_line != normalized_source:
                     raise HunkApplyException(
                         'abc context line {n}, "{line}" does not match "{sl}"'.format(
