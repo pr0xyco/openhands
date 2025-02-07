@@ -238,6 +238,12 @@ jobs:
               await exec.exec("python -m pip install --upgrade pip");
               await exec.exec("pip install -r requirements.txt");
             }
+            await github.rest.issues.createComment({
+              issue_number: ${{ env.ISSUE_NUMBER }},
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: "BBBBBB"
+            });
 
       - name: Attempt to resolve issue
         env:
@@ -323,6 +329,12 @@ jobs:
             // Check logs from send_pull_request.py (pushes code to GitHub)
             if (logContent.includes("Updated pull request")) {
               console.log("Updated pull request found. Skipping comment.");
+              await github.rest.issues.createComment({
+                issue_number: issueNumber,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `CCCCCC`
+              });
               process.env.AGENT_RESPONDED = 'true';
             } else if (logContent.includes(noChangesMessage)) {
               await github.rest.issues.createComment({
@@ -333,6 +345,12 @@ jobs:
               });
               process.env.AGENT_RESPONDED = 'true';
             }
+            await github.rest.issues.createComment({
+              issue_number: issueNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `DDDDDD`
+            });
 
       # Step leaves comment for when agent is invoked on issue
       - name: Comment on issue # Comment link to either PR or branch created by agent
@@ -405,6 +423,13 @@ jobs:
                 body: commentBody
               });
               process.env.AGENT_RESPONDED = 'true';
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: issueNumber,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `EEEEEE`
+              });
             }
 
       # Leave error comment when both PR/Issue comment handling fail
