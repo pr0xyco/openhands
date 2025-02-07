@@ -26,6 +26,7 @@ def apply_patch(repo_dir: str, patch: str) -> None:
         repo_dir: The directory containing the repository
         patch: The patch to apply
     """
+    print(f'applying patch to {repo_dir}')
     diffs = parse_patch(patch)
     for diff in diffs:
         if not diff.header.new_path:
@@ -126,6 +127,7 @@ def initialize_repo(
         issue_type: The type of the issue
         base_commit: The base commit to checkout (if issue_type is pr)
     """
+    print(f'initializing repository in {output_dir}')
     src_dir = os.path.join(output_dir, 'repo')
     dest_dir = os.path.join(output_dir, 'patches', f'{issue_type}_{issue_number}')
 
@@ -161,6 +163,7 @@ def make_commit(repo_dir: str, issue: GithubIssue, issue_type: str) -> None:
         issue: The issue to fix
         issue_type: The type of the issue
     """
+    print(f'making commit to {repo_dir}')
     # Check if git username is set
     result = subprocess.run(
         f'git -C {repo_dir} config user.name',
@@ -255,6 +258,7 @@ def send_pull_request(
         reviewer: The GitHub username of the reviewer to assign
         pr_title: Custom title for the pull request (optional)
     """
+    print(f'sending pull request to {github_issue.owner}/{github_issue.repo}')
     if pr_type not in ['branch', 'draft', 'ready']:
         raise ValueError(f'Invalid pr_type: {pr_type}')
 
@@ -546,6 +550,7 @@ def process_single_issue(
     reviewer: str | None = None,
     pr_title: str | None = None,
 ) -> None:
+    print(f'processing issue {resolver_output.issue.number}')
     if not resolver_output.success and not send_on_failure:
         print(
             f'Issue {resolver_output.issue.number} was not successfully resolved. Skipping PR creation.'
