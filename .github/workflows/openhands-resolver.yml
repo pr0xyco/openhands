@@ -1,4 +1,4 @@
-name: Auto-Fix Tagged Issue with OpenHands
+name: Auto-fix tagged issue with pr0xybot
 
 on:
   workflow_call:
@@ -10,7 +10,7 @@ on:
       macro:
         required: false
         type: string
-        default: "@openhands-agent"
+        default: "@pr0xybot"
       target_branch:
         required: false
         type: string
@@ -62,16 +62,15 @@ jobs:
   auto-fix:
     if: |
       github.event_name == 'workflow_call' ||
-      github.event.label.name == 'fix-me' ||
-      github.event.label.name == 'fix-me-experimental' ||
+      github.event.label.name == 'pr0xybot' ||
       (
         ((github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment') &&
-        contains(github.event.comment.body, inputs.macro || '@openhands-agent') &&
+        contains(github.event.comment.body, inputs.macro || '@pr0xybot') &&
         (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'COLLABORATOR' || github.event.comment.author_association == 'MEMBER')
         ) ||
 
         (github.event_name == 'pull_request_review' &&
-        contains(github.event.review.body, inputs.macro || '@openhands-agent') &&
+        contains(github.event.review.body, inputs.macro || '@pr0xybot') &&
         (github.event.review.author_association == 'OWNER' || github.event.review.author_association == 'COLLABORATOR' || github.event.review.author_association == 'MEMBER')
         )
       )
@@ -102,24 +101,12 @@ jobs:
           cat requirements.txt
 
       - name: Cache pip dependencies
-        if: |
-          !(
-            github.event.label.name == 'fix-me-experimental' ||
-            (
-              (github.event_name == 'issue_comment' || github.event_name == 'pull_request_review_comment') &&
-              contains(github.event.comment.body, '@openhands-agent-exp')
-            ) ||
-            (
-              github.event_name == 'pull_request_review' &&
-              contains(github.event.review.body, '@openhands-agent-exp')
-            )
-          )
         uses: actions/cache@v4
         with:
           path: ${{ env.pythonLocation }}/lib/python3.12/site-packages/*
-          key: ${{ runner.os }}-pip-pr0xy-openhands-resolver-${{ hashFiles('requirements.txt') }}
+          key: ${{ runner.os }}-pip-pr0xybot-resolver-${{ hashFiles('requirements.txt') }}
           restore-keys: |
-            ${{ runner.os }}-pip-pr0xy-openhands-resolver-${{ hashFiles('requirements.txt') }}
+            ${{ runner.os }}-pip-pr0xybot-resolver-${{ hashFiles('requirements.txt') }}
 
       - name: Check required environment variables
         env:
@@ -195,7 +182,7 @@ jobs:
               issue_number: ${{ env.ISSUE_NUMBER }},
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `[OpenHands](https://github.com/All-Hands-AI/OpenHands) started fixing the ${issueType}! You can monitor the progress [here](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}).`
+              body: `**pr0xybot** started fixing the ${issueType}! You can monitor the progress [here](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}).`
             });
 
       - name: Install OpenHands
@@ -212,33 +199,19 @@ jobs:
             const reviewBody = process.env.REVIEW_BODY.trim();
             const labelName = process.env.LABEL_NAME.trim();
             const eventName = process.env.EVENT_NAME.trim();
-            // Check conditions
-            const isExperimentalLabel = labelName === "fix-me-experimental";
-            const isIssueCommentExperimental =
-              (eventName === "issue_comment" || eventName === "pull_request_review_comment") &&
-              commentBody.includes("@openhands-agent-exp");
-            const isReviewCommentExperimental =
-              eventName === "pull_request_review" && reviewBody.includes("@openhands-agent-exp");
 
             // Set output variable
-            core.setOutput('isExperimental', isExperimentalLabel || isIssueCommentExperimental || isReviewCommentExperimental);
+            core.setOutput('isExperimental', false);
 
             // Perform package installation
-            // if (isExperimentalLabel || isIssueCommentExperimental || isReviewCommentExperimental) {
-            if (true) {
-              console.log("Installing experimental OpenHands...");
-              await exec.exec("python -m pip install --upgrade pip");
-              await exec.exec("pip install git+https://github.com/pr0xyco/openhands.git");
-            } else {
-              console.log("Installing from requirements.txt...");
-              await exec.exec("python -m pip install --upgrade pip");
-              await exec.exec("pip install -r requirements.txt");
-            }
+            console.log("Installing experimental OpenHands...");
+            await exec.exec("python -m pip install --upgrade pip");
+            await exec.exec("pip install git+https://github.com/pr0xyco/openhands.git");
 
       - name: Attempt to resolve issue
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
-          GITHUB_USERNAME: ${{ secrets.APP_USERNAME || 'openhands-agent' }}
+          GITHUB_USERNAME: ${{ secrets.APP_USERNAME || 'pr0xybot' }}
           LLM_MODEL: ${{ secrets.LLM_MODEL || inputs.LLM_MODEL }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
           LLM_BASE_URL: ${{ secrets.LLM_BASE_URL }}
@@ -322,7 +295,7 @@ jobs:
                 issue_number: issueNumber,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `CCCCCC`
+                body: `DEBUG: Updated pull request found. Skipping comment.`
               });
               process.env.AGENT_RESPONDED = 'true';
             } else if (logContent.includes(noChangesMessage)) {
@@ -330,16 +303,10 @@ jobs:
                 issue_number: issueNumber,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `The workflow to fix this issue encountered an error. Openhands failed to create any code changes.`
+                body: `The workflow to fix this issue encountered an error. pr0xybot failed to create any code changes.`
               });
               process.env.AGENT_RESPONDED = 'true';
             }
-            await github.rest.issues.createComment({
-              issue_number: issueNumber,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: logContent
-            });
 
       # Step leaves comment for when agent is invoked on issue
       - name: Comment on issue # Comment link to either PR or branch created by agent
@@ -417,7 +384,7 @@ jobs:
                 issue_number: issueNumber,
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                body: `EEEEEE`
+                body: `DEBUG: Fallback comment`
               });
             }
 
