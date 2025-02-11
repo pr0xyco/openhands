@@ -266,7 +266,7 @@ def send_pull_request(
     base_url = f'https://api.github.com/repos/{github_issue.owner}/{github_issue.repo}'
 
     # Create a new branch with a unique name
-    base_branch_name = f'openhands-fix-issue-{github_issue.number}'
+    base_branch_name = f'pr0xybot-fix-issue-{github_issue.number}'
     branch_name = base_branch_name
     attempt = 1
 
